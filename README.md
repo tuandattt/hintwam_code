@@ -49,7 +49,7 @@ SFT there.
 
 ## 1. Environment
 
-Tested with Python 3.10, CUDA 12.8, PyTorch 2.7.1, on 8 × 24 GB GPUs.
+Tested with Python 3.10, CUDA 12.8, PyTorch 2.7.1, on 8 × A5000 GPUs.
 
 ```bash
 conda create -n hintwam python=3.10 -y
