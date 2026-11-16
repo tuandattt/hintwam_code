@@ -1,0 +1,56 @@
+# @package _global_
+#
+# Ablation: Stage B with velocity matching (MSE) instead of the energy score.
+#
+#   bash scripts/train_zero2.sh 8 task=libero90_opsd_distill_mse #     resume=<SFT step_003000.pt> opsd.teacher_ckpt=<Stage A step_002000.pt>
+
+defaults:
+  - override /data: libero90
+  - override /model: fastwam
+  - _self_
+
+batch_size: 4
+num_workers: 8
+
+model:
+  mot_checkpoint_mixed_attn: true
+  # Every arm starts from the released LIBERO checkpoint, passed as `resume`;
+  # loading the generic ActionDiT backbone first would overwrite it.
+  skip_dit_load_from_pretrain: true
+  action_dit_pretrained_path: null
+
+opsd:
+  enabled: true
+  mode: distill
+  phi_provider: future_latent
+  phi_dim: 512
+  phi_tokens: 8
+  adapter_layers: [4, 9, 14, 19, 24, 29]
+  adapter_bottleneck: 512
+  alpha_init: 1.0
+  zero_init_up: true
+  action_loss_only: true
+  teacher_ckpt: null
+  loss_type: mse
+  energy_samples: 4
+  lambda_flow: 1.0
+  lambda_bc: 1.0
+  distill_inference_steps: 10
+  num_sigma_points: 3
+  loss_weighting: uniform
+
+frozen_experts: [video]
+save_trainable_only: false
+save_training_state: false
+
+lr_scheduler_type: "cosine"
+learning_rate: 1e-4
+num_epochs: 100
+max_steps: 2000
+log_every: 10
+save_every: 500
+eval_every: 1000
+
+gradient_accumulation_steps: 6
+weight_decay: 1e-2
+resume: null

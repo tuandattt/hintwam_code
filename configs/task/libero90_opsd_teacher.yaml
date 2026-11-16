@@ -1,0 +1,54 @@
+# @package _global_
+#
+# Stage A, hindsight teacher on LIBERO-90. The teacher reads the future video latents of
+# the demonstration through gated adapters; both experts stay frozen, so only the adapters
+# and the latent provider train (~13 M parameters).
+#
+#   bash scripts/train_zero2.sh 8 task=libero90_opsd_teacher resume=<SFT step_003000.pt>
+#
+# Watch `phi_gate` in the log: it starts at 0 and must rise for the teacher to use hindsight.
+
+defaults:
+  - override /data: libero90
+  - override /model: fastwam
+  - _self_
+
+batch_size: 8
+num_workers: 8
+
+model:
+  mot_checkpoint_mixed_attn: true
+  # Every arm starts from the released LIBERO checkpoint, passed as `resume`;
+  # loading the generic ActionDiT backbone first would overwrite it.
+  skip_dit_load_from_pretrain: true
+  action_dit_pretrained_path: null
+
+opsd:
+  enabled: true
+  mode: teacher
+  # The future latents already sit in the batch -- no extra data, no converter.
+  phi_provider: future_latent
+  phi_dim: 512
+  phi_tokens: 8
+  adapter_layers: [4, 9, 14, 19, 24, 29]
+  adapter_bottleneck: 512
+  alpha_init: 1.0
+  zero_init_up: true
+  action_loss_only: true
+
+# Both experts frozen: Stage A trains adapters + provider only (~13 M of 6.02 B).
+frozen_experts: [video, action]
+save_trainable_only: true
+save_training_state: false
+
+lr_scheduler_type: "cosine"
+learning_rate: 3e-4
+num_epochs: 100
+max_steps: 2000
+log_every: 10
+save_every: 250
+eval_every: 250
+
+gradient_accumulation_steps: 4
+weight_decay: 1e-2
+resume: null

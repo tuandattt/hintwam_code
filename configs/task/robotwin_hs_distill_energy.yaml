@@ -1,0 +1,59 @@
+# @package _global_
+#
+# RoboTwin Stage B, energy score -- the recipe that won on LIBERO-90
+# (2,000 steps, lr 1e-4 cosine, effective batch 192, lambda_flow = lambda_bc = 1).
+#
+#   bash scripts/train_zero2.sh 8 task=robotwin_hs_distill_energy resume=$BASE_R \
+#       opsd.teacher_ckpt=<robotwin_hs_teacher run>/checkpoints/weights/step_002000.pt
+#
+# batch 4 x 8 GPUs x accumulation 6 = 192. On 4 GPUs pass gradient_accumulation_steps=12.
+# Confirm "teacher loaded: N adapter + M provider tensors" in the first log lines.
+
+defaults:
+  - override /data: robotwin
+  - override /model: fastwam
+  - _self_
+
+batch_size: 4
+num_workers: 8
+
+model:
+  mot_checkpoint_mixed_attn: true
+  skip_dit_load_from_pretrain: true
+  action_dit_pretrained_path: null
+
+opsd:
+  enabled: true
+  mode: distill
+  phi_provider: future_latent
+  phi_dim: 512
+  phi_tokens: 8
+  adapter_layers: [4, 9, 14, 19, 24, 29]
+  adapter_bottleneck: 512
+  alpha_init: 1.0
+  zero_init_up: true
+  action_loss_only: true
+  teacher_ckpt: null
+  loss_type: energy
+  energy_samples: 4
+  lambda_flow: 1.0
+  lambda_bc: 1.0
+  distill_inference_steps: 10
+  num_sigma_points: 1
+  loss_weighting: uniform
+
+frozen_experts: [video]
+save_trainable_only: false
+save_training_state: false
+
+lr_scheduler_type: "cosine"
+learning_rate: 1e-4
+num_epochs: 100
+max_steps: 2000
+log_every: 10
+save_every: 500
+eval_every: 1000
+
+gradient_accumulation_steps: 6
+weight_decay: 1e-2
+resume: null

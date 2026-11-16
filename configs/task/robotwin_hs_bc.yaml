@@ -1,0 +1,55 @@
+# @package _global_
+#
+# RoboTwin Stage B CONTROL: robotwin_hs_distill_energy with lambda_flow = 0, i.e.
+# continued behaviour cloning from the same start, same data, trainable parameters,
+# LR schedule, steps and batch -- no teacher (none is built or needed).
+#
+#   bash scripts/train_zero2.sh 8 task=robotwin_hs_bc resume=$BASE_R
+
+defaults:
+  - override /data: robotwin
+  - override /model: fastwam
+  - _self_
+
+batch_size: 4
+num_workers: 8
+
+model:
+  mot_checkpoint_mixed_attn: true
+  skip_dit_load_from_pretrain: true
+  action_dit_pretrained_path: null
+
+opsd:
+  enabled: true
+  mode: distill
+  phi_provider: future_latent
+  phi_dim: 512
+  phi_tokens: 8
+  adapter_layers: [4, 9, 14, 19, 24, 29]
+  adapter_bottleneck: 512
+  alpha_init: 1.0
+  zero_init_up: true
+  action_loss_only: true
+  teacher_ckpt: null
+  loss_type: mse
+  lambda_flow: 0.0
+  lambda_bc: 1.0
+  distill_inference_steps: 10
+  num_sigma_points: 3
+  loss_weighting: uniform
+
+frozen_experts: [video]
+save_trainable_only: false
+save_training_state: false
+
+lr_scheduler_type: "cosine"
+learning_rate: 1e-4
+num_epochs: 100
+max_steps: 2000
+log_every: 10
+save_every: 500
+eval_every: 1000
+
+gradient_accumulation_steps: 6
+weight_decay: 1e-2
+resume: null

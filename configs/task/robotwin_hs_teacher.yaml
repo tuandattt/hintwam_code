@@ -1,0 +1,55 @@
+# @package _global_
+#
+# RoboTwin Stage A, hindsight teacher -- the LIBERO-90 recipe (libero90_opsd_teacher)
+# on RoboTwin 2.0. The teacher reads the future video latents of the clip it acts in.
+#
+# The released RoboTwin checkpoint was already trained on this data, so it plays the
+# role SFT played on LIBERO: the teacher is built on it directly.
+#
+#   bash scripts/train_zero2.sh 8 task=robotwin_hs_teacher resume=$BASE_R
+#
+# Check it before Stage B:  scripts/eval_teacher_advantage.py task=robotwin_hs_teacher
+#   resume=<this run>/checkpoints/weights/step_002000.pt +base_ckpt=$BASE_R
+
+defaults:
+  - override /data: robotwin
+  - override /model: fastwam
+  - _self_
+
+batch_size: 8
+num_workers: 8
+
+model:
+  mot_checkpoint_mixed_attn: true
+  # Every arm starts from the released RoboTwin checkpoint, passed as `resume`.
+  skip_dit_load_from_pretrain: true
+  action_dit_pretrained_path: null
+
+opsd:
+  enabled: true
+  mode: teacher
+  phi_provider: future_latent
+  phi_dim: 512
+  phi_tokens: 8
+  adapter_layers: [4, 9, 14, 19, 24, 29]
+  adapter_bottleneck: 512
+  alpha_init: 1.0
+  zero_init_up: true
+  action_loss_only: true
+
+# Both experts frozen: adapters + provider only (~13 M parameters).
+frozen_experts: [video, action]
+save_trainable_only: true
+save_training_state: false
+
+lr_scheduler_type: "cosine"
+learning_rate: 3e-4
+num_epochs: 100
+max_steps: 2000
+log_every: 10
+save_every: 250
+eval_every: 250
+
+gradient_accumulation_steps: 4
+weight_decay: 1e-2
+resume: null
