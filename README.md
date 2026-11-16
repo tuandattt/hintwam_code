@@ -236,11 +236,3 @@ in turn uses Wan2.2 and DiffSynth-Studio components. The LIBERO-90 data comes fr
 [LIBERO](https://github.com/Lifelong-Robot-Learning/LIBERO), in the LeRobot conversion by
 IPEC-COMMUNITY. The RoboTwin data comes from [RoboTwin 2.0](https://github.com/RoboTwin-Platform/RoboTwin).
 
-```bibtex
-@article{yuan2026fastwam,
-  title   = {Fast-WAM: Do World Action Models Need Test-time Future Imagination?},
-  author  = {Tianyuan Yuan and Zibin Dong and Yicheng Liu and Hang Zhao},
-  journal = {arXiv preprint arXiv:2603.16666},
-  year    = {2026}
-}
-```
