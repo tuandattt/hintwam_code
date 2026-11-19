@@ -229,6 +229,19 @@ LIBERO and RoboTwin evaluators of the Fast-WAM repository, using:
 - the released normalization statistics;
 - 10 sampler steps.
 
+## Citation
+
+If you find this work useful, please cite:
+
+```bibtex
+@article{dat2026hintwam,
+  title={HINT-WAM: Hindsight-Informed Training for World Action Models},
+  author={Phuong Tuan Dat and Qi Li and Xinchao Wang},
+  journal={arXiv preprint arXiv:2611.24789},
+  year={2026}
+}
+```
+
 ## Acknowledgements
 
 This code builds on [Fast-WAM](https://arxiv.org/abs/2603.16666) ([project page](https://yuantianyuan01.github.io/FastWAM/)) (MIT License), which
